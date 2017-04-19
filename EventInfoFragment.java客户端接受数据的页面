@@ -1,0 +1,165 @@
+
+package com.android.clientApp;
+
+//客户端代码  关键代码 导包
+import com.example.android.testapp.aidl.IRequestCallBack;
+import com.example.android.testapp.aidl.IRequestCityWeather;
+import com.example.android.testapp.aidl.RequestData;
+import com.android.clientApp.weather.WeatherParseJson;
+
+public class EventInfoFragment extends Fragment {
+    
+
+    // This is currently required by the fragment manager.
+    public EventInfoFragment() {
+    }
+   
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mContext = getActivity();
+    }
+   
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        //关键代码
+       
+        bindAIDLService();
+       
+   
+    }
+
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.e(TAG, "fx---->onCreateView: " );
+        //... 加载VIEW的过程
+
+        return mView;
+    }
+
+  
+    @Override
+    public void onDestroyView() {
+        // 注销  关键代码
+        getActivity().unbindService(mWeatherSeriveConnection);
+       
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+       
+        // System.gc();
+    }
+
+	//关键代码
+    private void bindAIDLService() {
+        try {
+            Log.e(TAG, "fx---->bindAIDLService: " );
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("com.example.android.testapp", "com.example.android.testapp.aidl.WeatherAidlService"));//这两个参数，第一个是server APP的包名，第二个是AIDLService包名路径
+            boolean bindResult = getActivity().bindService(intent, mWeatherSeriveConnection, Context.BIND_AUTO_CREATE);
+            Log.e(TAG, "fx---->bindResult : " + bindResult);
+            mTitle.setText("fx---->= " + bindResult, BufferType.SPANNABLE);
+
+        } catch (Exception e) {
+            Log.e(TAG, "fx--->bindService Exception, " + e.toString());
+        }
+
+    }
+    
+
+    private IRequestCityWeather requestCityWeather = null;
+
+
+	//关键代码
+    private final ServiceConnection mWeatherSeriveConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            
+            try {
+                Log.e(TAG, "fx---->EventInfoFragment onServiceDisconnected PackageName : " + getActivity().getPackageName());
+                requestCityWeather.unregisterCallBack(mCallBack, getActivity().getPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "fx---->onServiceDisconnected RemoteException : " + e.getMessage());
+            }
+            requestCityWeather = null;
+        }
+
+		
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // TODO Auto-generated method stub
+            Log.e(TAG, "fx---->onServiceConnected : " + name);
+            if (service.isBinderAlive()) {
+                Log.e(TAG, "fx---->onServiceConnected isBinderAlive:  " + service.isBinderAlive());
+            } else {
+                Log.e(TAG, "fx---->onServiceConnected isBinderAlive: " + service.isBinderAlive());
+            }
+            try {
+                requestCityWeather = IRequestCityWeather.Stub.asInterface(service);
+                Log.e(TAG, "fx----> onServiceConnected requestCityWeather to 3 -->" + requestCityWeather);
+
+                if(requestCityWeather!=null){
+                    registerCallBack();
+                }else{
+                    bindAIDLService();
+                }
+                
+            } catch (NoSuchMethodError e) {
+                Log.e(TAG, "fx---->onServiceConnected NoSuchMethodError : " + e.getMessage());
+            } catch (Exception e) {
+                Log.e(TAG, "fx---->onServiceConnected Exception : " + e.getMessage());
+            }
+        }
+    };
+
+	//关键代码
+    private void registerCallBack() {
+
+        try {
+            Log.e(TAG, "fx---->registerCallBack to : requestCityWeather" + requestCityWeather);
+            Log.e(TAG, "fx---->registerCallBack to : mCallBack" + mCallBack);
+            
+            requestCityWeather.registerCallBack(mCallBack, "com.android.clientApp");//注意第二个参数是clientAPP 的包名直接用 getActivity().getPackageName()；这种方式更好
+            
+			
+            requestDataByLocaiton(latitude, longitude, true);
+            
+        } catch (RemoteException e) {
+            Log.e(TAG, "fx---->registerCallBack RemoteException : " + e.getMessage());
+        }
+    }
+
+	//关键代码
+    public IRequestCallBack.Stub mCallBack = new IRequestCallBack.Stub() {
+
+        @Override
+        public void onRequestResult(String weatherJsonData, RequestData requestData) throws RemoteException {
+            Log.e(TAG, "fx---->EventInfoFragment onRequestResult requestFlag = " + requestData);
+            Log.e(TAG, "fx---->EventInfoFragment weatherJsonData = " + weatherJsonData.toString());//打印从server APP返回的值
+           // mWeather.setText();
+            if (!TextUtils.isEmpty(weatherJsonData)) {
+                showWeatherInfo(weatherJsonData,0);
+            }
+
+        }
+    };
+
+    private void requestDataByLocaiton(final double latitude, final double longitude, final boolean allDay) {
+        Log.e(TAG, "fx---->requestDataByLocaiton latitude = to 5 " + latitude + ",longitude=" + longitude + ",allDay =" + allDay);
+        if (null != requestCityWeather) {
+            try {
+                RequestData data = new RequestData(getActivity(), latitude, longitude);
+                data.setmAllDay(allDay);
+                requestCityWeather.requestWeatherByLocation(data);
+                Log.e(TAG, "fx---->requestDataByLocaiton RequestData == " + data.toString());
+            } catch (Exception e) {
+                Log.e(TAG, "fx---->requestDataByLocaiton Exception " + e.toString());
+            }
+        } else {
+            Log.e(TAG, "fx---->mCityWeatherManager null  end 6");
+        }
+    }
+
+}
