@@ -1,0 +1,193 @@
+// 客户端代码 AIDL文件 文件路径必须和服务端一致
+package com.huawei.android.totemweather.aidl;
+
+import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class RequestData implements Parcelable {
+
+    /** application package name */
+    private String mPackageName;
+    /** request flag */
+    private String mRequesetFlag;
+    /** form : beijing -> "cityId:101010100" , New York -> "cityId:USNY0996" */
+    private String mCityId;
+    /** location latitude */
+    private double mLatitude;
+    /** location longitude */
+    private double mLongitude;
+    /**
+     * request city weather type. see {@link #TYPE_MY_LOCATION} and
+     * {@link #TYPE_HOME_CITY}
+     */
+    private int mCityType = TYPE_HOME_CITY;
+    /** all future forecast weather, or one day weather */
+    private boolean mAllDay = true;
+
+    /** my location city type */
+    public static final int TYPE_MY_LOCATION = 1;
+    /** home city type */
+    public static final int TYPE_HOME_CITY = 2;
+    /**
+     * first return home city, return my location if home city not exists
+     */
+    public static final int TYPE_HOME_CITY_FIRST = 3;
+    /**
+     * first return my location, return home city if my location not exists
+     */
+    public static final int TYPE_MY_LOCATION_FIRST = 4;
+    public RequestData() {
+    }
+
+    public RequestData(Parcel in) {
+        readFromParcel(in);
+    }
+
+    /**
+     * use this constructor when you use
+     * {@link com.huawei.android.totemweather.aidl.IRequestCityWeather#requestWeatherByLocation(RequestData)}
+     *
+     * @param context Context
+     * @param latitude location latitude
+     * @param longitude location longitude
+     */
+    public RequestData(Context context, double latitude, double longitude) {
+        mPackageName = context.getPackageName();
+        mRequesetFlag = latitude + "," + longitude;
+        mLatitude = latitude;
+        mLongitude = longitude;
+
+    }
+
+    /**
+     * use this constructor when you use
+     * {@link com.huawei.android.totemweather.aidl.IRequestCityWeather#requestWeatherByCityId(RequestData)}
+     *
+     * @param context Context
+     * @param cityId form : beiJing -> "cityId:101010100" , New York ->
+     *            "cityId:USNY0996"
+     */
+    public RequestData(Context context, String cityId) {
+        mPackageName = context.getPackageName();
+        mRequesetFlag = cityId;
+        mCityId = cityId;
+    }
+
+    /**
+     * use this constructor when you use
+     * {@link com.huawei.android.totemweather.aidl.IRequestCityWeather#getWeatherByType(RequestData)}
+     *
+     * @param context
+     *            Context
+     * @param cityType request city weather type. see {@link #TYPE_MY_LOCATION} and {@link #TYPE_HOME_CITY}
+     */
+    public RequestData(Context context, int cityType) {
+        mPackageName = context.getPackageName();
+        mRequesetFlag = cityType + "";
+        mCityType = cityType;
+    }
+
+    public String getmPackageName() {
+        return mPackageName;
+    }
+
+    public void setmPackageName(String mPackageName) {
+        this.mPackageName = mPackageName;
+    }
+
+    public String getmRequesetFlag() {
+        return mRequesetFlag;
+    }
+
+    public void setmRequesetFlag(String mRequesetFlag) {
+        this.mRequesetFlag = mRequesetFlag;
+    }
+
+    public String getmCityId() {
+        return mCityId;
+    }
+
+    public void setmCityId(String mCityId) {
+        this.mCityId = mCityId;
+    }
+
+    public double getmLatitude() {
+        return mLatitude;
+    }
+
+    public void setmLatitude(double mLatitude) {
+        this.mLatitude = mLatitude;
+    }
+
+    public double getmLongitude() {
+        return mLongitude;
+    }
+
+    public void setmLongitude(double mLongitude) {
+        this.mLongitude = mLongitude;
+    }
+
+    public int getmCityType() {
+        return mCityType;
+    }
+
+    public void setmCityType(int mCityType) {
+        this.mCityType = mCityType;
+    }
+
+    public boolean ismAllDay() {
+        return mAllDay;
+    }
+
+    public void setmAllDay(boolean mAllDay) {
+        this.mAllDay = mAllDay;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public void readFromParcel(Parcel in) {
+        mPackageName = in.readString();
+        mRequesetFlag = in.readString();
+        mCityId = in.readString();
+        mLatitude = in.readDouble();
+        mLongitude = in.readDouble();
+        mCityType = in.readInt();
+        mAllDay = in.readInt() == 1;
+
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mPackageName);
+        dest.writeString(mRequesetFlag);
+        dest.writeString(mCityId);
+        dest.writeDouble(mLatitude);
+        dest.writeDouble(mLongitude);
+        dest.writeInt(mCityType);
+        dest.writeInt(mAllDay ? 1 : 0);
+    }
+
+    public static final Parcelable.Creator<RequestData> CREATOR = new Parcelable.Creator<RequestData>() {
+        public RequestData createFromParcel(Parcel p) {
+            return new RequestData(p);
+        }
+
+        public RequestData[] newArray(int size) {
+            return new RequestData[size];
+        }
+    };
+
+    @Override
+    public String toString() {
+        return "RequestData [mPackageName=" + mPackageName + ", mRequesetFlag="
+                + mRequesetFlag + ", mCityId=" + mCityId + ", mCityType="
+                + mCityType + ", mAllDay=" + mAllDay + "]";
+    }
+
+
+
+}
