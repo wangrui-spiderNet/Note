@@ -1,0 +1,36 @@
+// 客户端代码 AIDL文件 文件路径必须和服务端一致
+package com.huawei.android.totemweather.aidl;
+
+import com.huawei.android.totemweather.aidl.IRequestCallBack;
+import com.huawei.android.totemweather.aidl.RequestData;
+
+interface IRequestCityWeather {
+
+    /** 
+      * request weather by the latitude and longitude,return the form of JSON data 
+      * @param requestData RequestData
+      * @return
+      */
+    void requestWeatherByLocation(in RequestData requestData);
+
+     /** 
+      * request the weather of cityInfo by the cityId from weather app.
+      * @param requestData RequestData
+      * @return 
+      */
+    void requestWeatherByCityId(in RequestData requestData);
+
+    /** 
+      * Get the weather of cityInfo by the cityType from weather app.
+      * @param requestData RequestData
+      * @return String Return the form of JSON data 
+      */
+    void getWeatherByType(in RequestData requestData);
+
+    void registerCallBack(IRequestCallBack callback, String packageName);
+    void unregisterCallBack(IRequestCallBack callback, String packageName);
+
+    void requestWeatherByLocationAndSourceType(in RequestData requestData, int type);
+
+    void requestWeatherWithLocation(in RequestData requestData, int sourceType, int parsePhaseType);
+}
