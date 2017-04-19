@@ -1,0 +1,4 @@
+// 客户端代码 AIDL文件 文件路径必须和服务端一致
+package com.huawei.android.totemweather.aidl;
+
+parcelable RequestData;
