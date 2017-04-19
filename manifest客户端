@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.clientApp"
+    android:sharedUserLabel="@string/app_label"
+    android:versionCode="50000001"
+    android:versionName="5.0.0.2" >
+
+   <!-- 关键代码 由于对方的AIDLservice加了此权限，因此客户端需要在此声明此权限-->
+    <uses-permission android:name="com.example.android.testapp.permission.ACCESS_WEATHERCLOCK_PROVIDER"></uses-permission>
+   
+    <application
+        android:name="CalendarApplication"
+        android:backupAgent="com.android.clientApp.CalendarBackupAgent"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/ic_launcher_icon"
+        android:label="@string/app_label"
+        android:supportsRtl="true"
+        android:multiArch="true"
+        android:allowBackup="false"
+        android:taskAffinity="android.task.clientApp" >
+        
+       
+    </application>
+
+</manifest>
