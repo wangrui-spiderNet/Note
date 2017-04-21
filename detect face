@@ -1,0 +1,51 @@
+package com.wade.myfacedetection;
+
+import android.content.Context;
+import android.os.PowerManager;
+import android.util.Log;
+
+/**
+ * Created by wWX451576 on 2017/4/20.
+ */
+
+public class PowerManagerWakeLock {
+
+    private static PowerManager.WakeLock wakeLock;
+    private static PowerManager pm;
+
+    /**
+     * 开启 保持屏幕唤醒
+     */
+    public static void acquire(Context context) {
+        Log.e("----->FaceDetect", "lock wake up");
+        if (pm == null) {
+            pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        }
+
+        getWakeLock();
+
+        Log.e("----->FaceDetect", "is Lighted1:" + wakeLock.isHeld());
+        if (!wakeLock.isHeld()) {
+            wakeLock.acquire();
+        }
+        Log.e("----->FaceDetect", "is Lighted2:" + wakeLock.isHeld());
+    }
+
+    private static PowerManager.WakeLock getWakeLock() {
+        if (wakeLock == null) {
+            wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, "PowerManagerWakeLock");
+        }
+        return wakeLock;
+    }
+
+    /**
+     * 关闭 保持屏幕唤醒
+     */
+    public static void release() {
+        if (wakeLock != null) {
+            Log.e("----->FaceDetect", "lock shut down");
+            wakeLock.release();
+            wakeLock = null;
+        }
+    }
+}
